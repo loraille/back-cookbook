@@ -2,9 +2,17 @@ const mongoose = require('mongoose');
 
 const ingredientSchema = new mongoose.Schema(
   {
-    nom: String,
+    ingredient: String,
     quantite: String,
     unite: String,
+  },
+  { _id: false },
+);
+
+const prepSchema = new mongoose.Schema(
+  {
+    consigne: String,
+    index: String,
   },
   { _id: false },
 );
@@ -12,15 +20,14 @@ const ingredientSchema = new mongoose.Schema(
 const recetteSchema = mongoose.Schema(
   {
     titre: String,
-    nombrePersonnes: Number,
-    tempsPreparation: Number,
-    tempsCuisson: Number,
+    nombrePersonnes: String,
+    tempsPreparation: String,
+    tempsCuisson: String,
     ingredients: [ingredientSchema],
-    instructions: [{ String }],
+    preparation: [prepSchema],
     image: String,
-    publishDate: Date,
     notes: String,
-    category: [{ type: mongoose.Schema.Types.ObjectId, ref: 'categories' }],
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'categories' },
   },
   {
     timestamps: true,

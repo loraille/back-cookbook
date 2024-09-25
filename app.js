@@ -9,6 +9,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var categorieRouter = require('./routes/categorie');
 var recoRouter = require('./routes/reco');
+var recetteRouter = require('./routes/recette');
 
 var app = express();
 
@@ -31,5 +32,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/reco', recoRouter);
 app.use('/categorie', categorieRouter);
+app.use('/recette', recetteRouter);
 
 module.exports = app;
