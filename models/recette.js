@@ -27,7 +27,7 @@ const recetteSchema = mongoose.Schema(
     preparation: [prepSchema],
     image: String,
     notes: String,
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'categories' },
+    categorie: { type: mongoose.Schema.Types.ObjectId, ref: 'categories' },
   },
   {
     timestamps: true,

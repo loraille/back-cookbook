@@ -81,13 +81,37 @@ router.post('/signin', (req, res) => {
     });
 });
 //* //////////////////////////////////ajout de recettes//////////////////////////////////////
-router.post('/recette', async (req, res) => {
+router.put('/recette/:userToken/:id', async (req, res) => {
   try {
-    const nouvelleRecette = new Recette(req.body);
-    const recetteSauvegardee = await nouvelleRecette.save();
-    res.status(201).json(recetteSauvegardee);
+    const { userToken, id } = req.params;
+
+    const user = await User.findOne({ token: userToken });
+
+    if (!user) {
+      return res.status(404).json({
+        result: false,
+        message: 'Utilisateur non trouvé',
+      });
+    }
+    if (user.recettes.includes(id)) {
+      return res
+        .status(400)
+        .json({ result: false, message: 'La recette est déjà présente' });
+    }
+
+    user.recettes.push(id);
+
+    await user.save();
+
+    res
+      .status(201)
+      .json({
+        result: true,
+        message: 'Recette ajoutée',
+        recettes: user.recettes,
+      });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ result: false, message: err.message });
   }
 });
 
