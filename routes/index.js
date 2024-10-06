@@ -8,6 +8,7 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
+
 //* ////////////////////////////////create user////////////////////////////////////////////
 router.post('/signup', async (req, res) => {
   if (!checkBody(req.body, ['username', 'email', 'password'])) {
@@ -63,7 +64,7 @@ router.post('/signin', (req, res) => {
   User.findOne({
     username: { $regex: new RegExp(`^${req.body.username}$`, 'i') },
   })
-    // .populate(["favorites", "following"])
+    //.populate(['recettes'])
     .then((userInfo) => {
       if (
         userInfo &&
@@ -73,12 +74,80 @@ router.post('/signin', (req, res) => {
         userInfo = {
           username: userInfo.username,
           token: userInfo.token,
+          recettes: userInfo.recettes,
         };
         res.json({ result: true, userInfo });
       } else {
         res.json({ result: false, error: 'wrong username or password' });
       }
     });
+});
+//* ------------------------------Récupération des recettes------------------------------------
+router.get('/recettes/:token', (req, res) => {
+  console.log('---------------------Get user recispes---------------------');
+  const userToken = req.params.token;
+
+  User.findOne({
+    token: userToken,
+  })
+    .populate({
+      path: 'recettes',
+      populate: {
+        path: 'categorie',
+        model: 'categories',
+        select: '-_id -__v',
+      },
+    })
+    .then((userInfo) => {
+      if (userInfo) {
+        userInfo = { recettes: userInfo.recettes };
+        res.json({ result: true, userInfo });
+      } else {
+        res.json({ result: false, error: 'wrong username or password' });
+      }
+    });
+});
+//* ------------------------------Récupération des recettes par category------------------------------------
+router.get('/recettes/:token/:category', async (req, res) => {
+  try {
+    console.log('---------------------Get user recipes---------------------');
+    const userToken = req.params.token;
+    const category = req.params.category;
+
+    const userInfo = await User.findOne({ token: userToken }).populate({
+      path: 'recettes',
+      populate: {
+        path: 'categorie',
+        model: 'categories',
+        select: '-_id -__v',
+        match: { name: category },
+      },
+    });
+
+    if (userInfo) {
+      const filteredRecettes = userInfo.recettes.filter(
+        (recette) => recette.categorie !== null,
+      );
+      const userRecipes = { recettes: filteredRecettes };
+
+      if (userRecipes.recettes.length > 0) {
+        res.json({
+          result: true,
+          userInfo: userRecipes,
+        });
+      } else {
+        res.json({
+          result: false,
+          error: 'No recipes found for this category',
+        });
+      }
+    } else {
+      res.json({ result: false, error: 'wrong username or password' });
+    }
+  } catch (error) {
+    console.error('Error fetching user recipes:', error);
+    res.status(500).json({ result: false, error: 'Internal Server Error' });
+  }
 });
 //* //////////////////////////////////ajout de recettes//////////////////////////////////////
 router.put('/recette/:userToken/:id', async (req, res) => {
@@ -103,13 +172,11 @@ router.put('/recette/:userToken/:id', async (req, res) => {
 
     await user.save();
 
-    res
-      .status(201)
-      .json({
-        result: true,
-        message: 'Recette ajoutée',
-        recettes: user.recettes,
-      });
+    res.status(201).json({
+      result: true,
+      message: 'Recette ajoutée',
+      recettes: user.recettes,
+    });
   } catch (err) {
     res.status(400).json({ result: false, message: err.message });
   }

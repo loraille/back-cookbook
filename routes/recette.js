@@ -15,6 +15,7 @@ router.post('/', async (req, res) => {
       preparation,
       nombrePersonnes,
       categorie,
+      image,
     } = req.body;
     const newRecette = new Recette({
       tempsPreparation,
@@ -24,15 +25,14 @@ router.post('/', async (req, res) => {
       preparation,
       nombrePersonnes,
       categorie,
+      image,
     });
     await newRecette.save();
-    res
-      .status(201)
-      .json({
-        result: true,
-        message: 'Recette created successfully',
-        data: newRecette,
-      });
+    res.status(201).json({
+      result: true,
+      message: 'Recette created successfully',
+      data: newRecette,
+    });
   } catch (error) {
     console.error('Error with server:', error);
     res.status(500).json({ result: false, error: 'Internal server error' });
