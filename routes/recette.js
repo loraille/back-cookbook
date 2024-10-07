@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const cloudinary = require('cloudinary').v2;
 const Recette = require('../models/recette');
+const User = require('../models/user');
 
 //* ----------------------------add a new reciepe
 router.post('/', async (req, res) => {
@@ -75,7 +76,31 @@ router.delete('/cloudinary/delete/:url', async (req, res) => {
     res.status(500).json({ message: 'Error deleting artwork', error });
   }
 });
+//* -----------------DELETE USER RECIEPE-----------------
+router.delete('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
 
+    // Suppress from recettes
+    const deletedRecette = await Recette.findByIdAndDelete(id);
+
+    if (!deletedRecette) {
+      return res
+        .status(404)
+        .json({ result: false, message: 'Recette not found' });
+    }
+
+    // Suppress from user
+    await User.updateMany({ recettes: id }, { $pull: { recettes: id } });
+
+    res.json({ result: true, message: 'Recette deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ result: false, message: 'Error deleting recette', error });
+  }
+});
 //!---------------------DELETE ALL--------------------
 router.delete('/', async (req, res) => {
   try {
