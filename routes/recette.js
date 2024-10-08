@@ -91,7 +91,12 @@ router.delete('/:id', async (req, res) => {
     }
 
     // Suppress from user
-    await User.updateMany({ recettes: id }, { $pull: { recettes: id } });
+
+    const usersWithRecette = await User.find({ recettes: id });
+
+    if (usersWithRecette.length > 0) {
+      await User.updateMany({ recettes: id }, { $pull: { recettes: id } });
+    }
 
     res.json({ result: true, message: 'Recette deleted successfully' });
   } catch (error) {
