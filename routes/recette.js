@@ -39,41 +39,35 @@ router.post('/', async (req, res) => {
     res.status(500).json({ result: false, error: 'Internal server error' });
   }
 });
-
 //---------------------UPDATE NOTES-----------------------------------------
 router.put('/notes/:id', async (req, res) => {
+  console.log('update notes');
   try {
     const id = req.params.id;
     const { notes } = req.body;
-    const updatedRecette = await Recette.findByIdAndUpdate(
-      id,
-      { $set: { notes } },
-      { new: true },
-    );
+
+    console.log('ID:', id);
+    console.log('Notes:', notes);
+
+    const recette = await Recette.findById(id);
+
+    if (!recette) {
+      console.log('Recette not found with ID:', id);
+      return res
+        .status(404)
+        .json({ result: false, message: 'Recette non trouvée' });
+    }
+
+    recette.notes = notes;
+
+    await recette.save();
+
     res
       .status(200)
       .json({ result: true, message: 'Notes updated successfully' });
   } catch (error) {
     console.error('Error with server:', error);
     res.status(500).json({ result: false, error: 'Internal server error' });
-  }
-});
-//*---------------------DELETE CLOUDINARY-------------
-router.delete('/cloudinary/delete/:url', async (req, res) => {
-  try {
-    const encodedUrlCloudinary = req.params.url;
-    const urlCloudinary = decodeURIComponent(encodedUrlCloudinary);
-    // Extract publicId in URL to suppress in Cloudinary
-    let url = urlCloudinary.split('/');
-    let publicId = url[url.length - 1].split('.')[0]; // no extension. we keep it only for raw
-
-    // Suppress from Cloudinary
-    await cloudinary.uploader.destroy(publicId);
-
-    res.json({ result: true, message: 'image destroyed' }); // 1 artwork removed
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error deleting artwork', error });
   }
 });
 //* -----------------DELETE USER RECIEPE-----------------
@@ -106,6 +100,25 @@ router.delete('/:id', async (req, res) => {
       .json({ result: false, message: 'Error deleting recette', error });
   }
 });
+//*---------------------DELETE CLOUDINARY-------------
+router.delete('/cloudinary/delete/:url', async (req, res) => {
+  try {
+    const encodedUrlCloudinary = req.params.url;
+    const urlCloudinary = decodeURIComponent(encodedUrlCloudinary);
+    // Extract publicId in URL to suppress in Cloudinary
+    let url = urlCloudinary.split('/');
+    let publicId = url[url.length - 1].split('.')[0]; // no extension. we keep it only for raw
+
+    // Suppress from Cloudinary
+    await cloudinary.uploader.destroy(publicId);
+
+    res.json({ result: true, message: 'image destroyed' }); // 1 artwork removed
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting artwork', error });
+  }
+});
+
 //!---------------------DELETE ALL--------------------
 router.delete('/', async (req, res) => {
   try {

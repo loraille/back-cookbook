@@ -149,8 +149,46 @@ router.get('/recettes/:token/:category', async (req, res) => {
     res.status(500).json({ result: false, error: 'Internal Server Error' });
   }
 });
+//* ------------------GET RECIEPES BY NAME----------------------------
+router.get('/getRecettes/:token/:name', async (req, res) => {
+  try {
+    console.log('---------------------Get user recipes---------------------');
+    const userToken = req.params.token;
+    const name = req.params.name;
+
+    const userInfo = await User.findOne({ token: userToken }).populate({
+      path: 'recettes',
+      select: '-__v',
+    });
+
+    if (userInfo) {
+      const filteredRecettes = userInfo.recettes.filter(
+        (recette) => recette.titre && recette.titre.includes(name),
+      );
+      const userRecipes = { recettes: filteredRecettes };
+
+      if (userRecipes.recettes.length > 0) {
+        res.json({
+          result: true,
+          userInfo: userRecipes,
+        });
+      } else {
+        res.json({
+          result: false,
+          error: 'No recipes found with this name',
+        });
+      }
+    } else {
+      res.json({ result: false, error: 'wrong username or password' });
+    }
+  } catch (error) {
+    console.error('Error fetching user recipes:', error);
+    res.status(500).json({ result: false, error: 'Internal Server Error' });
+  }
+});
+
 //* //////////////////////////////////ajout de recettes//////////////////////////////////////
-router.put('/recette/:userToken/:id', async (req, res) => {
+router.put('/newRecette/:userToken/:id', async (req, res) => {
   try {
     const { userToken, id } = req.params;
 
