@@ -39,6 +39,88 @@ router.post('/', async (req, res) => {
     res.status(500).json({ result: false, error: 'Internal server error' });
   }
 });
+//*---------------------GET RECIEPE BY ID--------------------------------------
+router.get('/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const recette = await Recette.findById(id);
+
+    if (!recette) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+
+    res.status(200).json(recette);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+//*---------------------UPDATE RECIEPE-----------------------------------------
+router.put('/recetteInfo/:id', async (req, res) => {
+  console.log('update recipe');
+  console.log('Received data:', req.body);
+  try {
+    const id = req.params.id;
+    const {
+      titre,
+      nombrePersonnes,
+      tempsPreparation,
+      tempsCuisson,
+      ingredients,
+      preparation,
+      image,
+      notes,
+      categorie,
+    } = req.body;
+
+    const recette = await Recette.findById(id);
+
+    if (!recette) {
+      console.log('Recette not found with ID:', id);
+      return res
+        .status(404)
+        .json({ result: false, message: 'Recette not found' });
+    }
+
+    if (titre !== undefined && titre !== recette.titre) recette.titre = titre;
+    if (
+      nombrePersonnes !== undefined &&
+      nombrePersonnes !== recette.nombrePersonnes
+    )
+      recette.nombrePersonnes = nombrePersonnes;
+    if (
+      tempsPreparation !== undefined &&
+      tempsPreparation !== recette.tempsPreparation
+    )
+      recette.tempsPreparation = tempsPreparation;
+    if (tempsCuisson !== undefined && tempsCuisson !== recette.tempsCuisson)
+      recette.tempsCuisson = tempsCuisson;
+    if (
+      ingredients !== undefined &&
+      JSON.stringify(ingredients) !== JSON.stringify(recette.ingredients)
+    )
+      recette.ingredients = ingredients;
+    if (
+      preparation !== undefined &&
+      JSON.stringify(preparation) !== JSON.stringify(recette.preparation)
+    )
+      recette.preparation = preparation;
+    if (image !== undefined && image !== recette.image) recette.image = image;
+    if (notes !== undefined && notes !== recette.notes) recette.notes = notes;
+    if (categorie !== undefined && categorie !== recette.categorie)
+      recette.categorie = categorie;
+
+    await recette.save();
+
+    res
+      .status(200)
+      .json({ result: true, message: 'Recette updated successfully', recette });
+  } catch (error) {
+    console.error('Error with server:', error);
+    res.status(500).json({ result: false, error: 'Internal server error' });
+  }
+});
 //---------------------UPDATE NOTES-----------------------------------------
 router.put('/notes/:id', async (req, res) => {
   console.log('update notes');

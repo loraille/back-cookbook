@@ -44,4 +44,18 @@ router.get('/:category', async (req, res) => {
   }
 });
 
+//* -----------get category infos by id----------
+router.get('/id/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const categoryInfo = await Category.findOne({ _id: id });
+    if (categoryInfo) {
+      res.json({ result: true, categoryInfo });
+    }
+  } catch (error) {
+    console.error('problem to get category infos:', error);
+    res.status(500).json({ result: false, error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

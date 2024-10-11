@@ -119,7 +119,7 @@ router.get('/recettes/:token/:category', async (req, res) => {
       populate: {
         path: 'categorie',
         model: 'categories',
-        select: '-_id -__v',
+        select: '-__v',
         match: { name: category },
       },
     });
