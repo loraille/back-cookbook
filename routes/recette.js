@@ -202,16 +202,16 @@ router.delete('/cloudinary/delete/:url', async (req, res) => {
 });
 
 //!---------------------DELETE ALL--------------------
-router.delete('/', async (req, res) => {
-  try {
-    await Recette.deleteMany({});
-    res
-      .status(200)
-      .json({ result: true, message: 'All recettes deleted successfully' });
-  } catch (error) {
-    console.error('Error with server:', error);
-    res.status(500).json({ result: false, error: 'Internal server error' });
-  }
-});
+// router.delete('/', async (req, res) => {
+//   try {
+//     await Recette.deleteMany({});
+//     res
+//       .status(200)
+//       .json({ result: true, message: 'All recettes deleted successfully' });
+//   } catch (error) {
+//     console.error('Error with server:', error);
+//     res.status(500).json({ result: false, error: 'Internal server error' });
+//   }
+// });
 
 module.exports = router;
