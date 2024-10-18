@@ -154,18 +154,29 @@ router.get('/getRecettes/:token/:name', async (req, res) => {
   try {
     console.log('---------------------Get user recipes---------------------');
     const userToken = req.params.token;
-    const name = req.params.name;
+    const name = req.params.name.toLowerCase();
 
     const userInfo = await User.findOne({ token: userToken }).populate({
       path: 'recettes',
       select: '-__v',
+      populate: {
+        path: 'categorie',
+        select: '-__v',
+      },
     });
 
     if (userInfo) {
       const filteredRecettes = userInfo.recettes.filter(
-        (recette) => recette.titre && recette.titre.includes(name),
+        (recette) =>
+          recette.titre && recette.titre.toLowerCase().includes(name),
       );
-      const userRecipes = { recettes: filteredRecettes };
+
+      const regex = new RegExp(name.split(' ').join('|'), 'i');
+      const regexFilteredRecettes = userInfo.recettes.filter(
+        (recette) => recette.titre && regex.test(recette.titre.toLowerCase()),
+      );
+
+      const userRecipes = { recettes: regexFilteredRecettes };
 
       if (userRecipes.recettes.length > 0) {
         res.json({
