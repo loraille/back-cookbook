@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'File not found in request.' });
     }
 
-    const filePath = path.join(__dirname, '..', 'tmp', `${uniqid()}.jpg`);
+    const filePath = `/tmp/${uniqid()}.jpg`;
 
     // Sauvegarde temporaire du fichier
     const resultMove = await file.mv(filePath);
