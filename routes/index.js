@@ -262,7 +262,7 @@ router.post('/upload', async (req, res) => {
       return res.status(400).json({ result: false, error: 'No file uploaded' });
     }
 
-    const photoPath = `./tmp/${uniqid()}.jpg`;
+    const photoPath = `/tmp/${uniqid()}.jpg`;
     const resultMove = await req.files.photoFromFront.mv(photoPath);
     if (!resultMove) {
       const resultCloudinary = await cloudinary.uploader.upload(photoPath);
