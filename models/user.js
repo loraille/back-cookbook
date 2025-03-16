@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema(
     },
     token: String,
     password: String,
-    recettes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'recettes' }],
+    settings: [mongoose.Schema.Types.Mixed],
   },
   {
     timestamps: true,
